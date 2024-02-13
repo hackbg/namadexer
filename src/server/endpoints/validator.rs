@@ -59,9 +59,35 @@ pub async fn get_validator_uptime(
     Ok(Json(uv))
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
+pub struct Validator {
+    address:       String,
+    blocks_signed: i64,
+    oldest_block:  i64,
+    latest_block:  i64,
+}
+
+impl TryFrom<&Row> for Validator {
+    type Error = Error;
+
+    #[instrument(level = "trace", skip(row))]
+    fn try_from(row: &Row) -> Result<Self, Self::Error> {
+        Ok(Validator {
+            address:       row.try_get("address")?,
+            blocks_signed: row.try_get("blocks_signed")?,
+            oldest_block:  row.try_get("oldest_block")?,
+            latest_block:  row.try_get("latest_block")?,
+        })
+    }
+}
+
 pub async fn get_validator_list(
     State(state): State<ServerState>,
-) -> Result<Json<Vec<Row>>, Error> {
+) -> Result<Json<Vec<Validator>>, Error> {
     info!("calling /validators");
-    Ok(Json(state.db.validator_list().await?))
+    let mut rows: Vec<Validator> = vec![];
+    for row in state.db.validator_list().await?.iter() {
+        rows.push(row.try_into()?);
+    }
+    Ok(Json(rows))
 }

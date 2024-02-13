@@ -1397,7 +1397,10 @@ impl Database {
     pub async fn validator_list(&self) -> Result<Vec<Row>, Error> {
         query(&format!(r#"SELECT * from (
             SELECT DISTINCT ON (validator_address)
-            validator_address, count(*), min(timestamp), max(timestamp)
+                validator_address as address,
+                count(*)          as blocks_signed,
+                min(timestamp)    as oldest_block,
+                max(timestamp)    as latest_block
             FROM "{0}".commit_signatures
             GROUP BY validator_address
         ) ORDER BY count DESC LIMIT $1 OFFSET $2;"#, self.network))
