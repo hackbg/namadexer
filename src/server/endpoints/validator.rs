@@ -58,3 +58,10 @@ pub async fn get_validator_uptime(
 
     Ok(Json(uv))
 }
+
+pub async fn get_validator_list(
+    State(state): State<ServerState>,
+) -> Result<Json<Vec<Row>>, Error> {
+    info!("calling /validators");
+    Ok(Json(state.db.validator_list().await?))
+}

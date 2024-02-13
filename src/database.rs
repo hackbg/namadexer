@@ -1393,6 +1393,19 @@ impl Database {
             .map_err(Error::from)
     }
 
+    // Return a list of all validators
+    pub async fn validator_list(&self) -> Result<Vec<Row>, Error> {
+        query(&format!(r#"SELECT * from (
+            SELECT DISTINCT ON (validator_address)
+            validator_address, count(*), min(timestamp), max(timestamp)
+            FROM "{0}".commit_signatures
+            GROUP BY validator_address
+        ) ORDER BY count DESC LIMIT $1 OFFSET $2;"#, self.network))
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(Error::from)
+    }
+
     // Return the number of commits signed by the `validator_address` in a range of 500 blocks.
     // It is use to calculate the validator uptime.
     pub async fn validator_uptime(
