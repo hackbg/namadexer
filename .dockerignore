@@ -2,3 +2,4 @@
 contrib/
 protoc/
 target/
+shell.nix
