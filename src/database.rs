@@ -1403,7 +1403,7 @@ impl Database {
                 max(timestamp)    as latest_block
             FROM "{0}".commit_signatures
             GROUP BY validator_address
-        ) ORDER BY count DESC LIMIT $1 OFFSET $2;"#, self.network))
+        ) ORDER BY blocks_signed;"#, self.network))
             .fetch_all(&*self.pool)
             .await
             .map_err(Error::from)
