@@ -63,8 +63,8 @@ pub async fn get_validator_uptime(
 pub struct Validator {
     address:       String,
     blocks_signed: i64,
-    oldest_block:  i64,
-    latest_block:  i64,
+    oldest_block:  String,
+    latest_block:  String,
 }
 
 impl TryFrom<&Row> for Validator {
