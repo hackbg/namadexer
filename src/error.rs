@@ -53,7 +53,7 @@ pub enum Error {
     SerdeJsonError(#[from] serde_json::Error),
     #[error("Invalid checksum data")]
     InvalidChecksum,
-    #[error("Unknow error: {0}")]
+    #[error("Unknown error: {0}")]
     Generic(Box<dyn StdError + Send>),
     #[error("ParseInt error")]
     ParseIntError(#[from] ParseIntError),
