@@ -569,7 +569,7 @@ impl Database {
             return Ok(());
         }
 
-        info!(message = "Saving transactions");
+        info!("Saving {} transactions", txs.len());
 
         let mut query_builder: QueryBuilder<_> = QueryBuilder::new(format!(
             "INSERT INTO \"{}\".transactions(
