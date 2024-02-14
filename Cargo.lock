@@ -4044,6 +4044,7 @@ dependencies = [
  "async-trait",
  "axum",
  "axum-prometheus",
+ "bech32 0.9.1",
  "bytes",
  "clap",
  "config",

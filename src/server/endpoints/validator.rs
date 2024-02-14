@@ -2,6 +2,7 @@ use axum::{
     extract::{Path, Query, State},
     Json,
 };
+use bech32::{self, ToBase32, Variant};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow as Row;
 use sqlx::Row as TRow;
@@ -72,8 +73,11 @@ impl TryFrom<&Row> for Validator {
 
     #[instrument(level = "trace", skip(row))]
     fn try_from(row: &Row) -> Result<Self, Self::Error> {
+        let address: Vec<u8> = row.try_get("address")?;
+        let address = bech32::encode("tnam", address.to_base32(), Variant::Bech32)
+            .map_err(|e|Error::Generic(Box::new(e)))?;
         Ok(Validator {
-            address:       row.try_get("address")?,
+            address,
             blocks_signed: row.try_get("blocks_signed")?,
             oldest_block:  row.try_get("oldest_block")?,
             latest_block:  row.try_get("latest_block")?,

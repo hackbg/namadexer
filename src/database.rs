@@ -1397,7 +1397,7 @@ impl Database {
     pub async fn validator_list(&self) -> Result<Vec<Row>, Error> {
         query(&format!(r#"SELECT * from (
             SELECT DISTINCT ON (validator_address)
-                encode(validator_address::bytea, 'hex') as address,
+                validator_address as address,
                 count(*)          as blocks_signed,
                 min(timestamp)    as oldest_block,
                 max(timestamp)    as latest_block
