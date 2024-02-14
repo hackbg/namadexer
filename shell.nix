@@ -1,13 +1,20 @@
-let
-  rev   = "a5da8f82aadf0b90175eace3ed96319c6dd9d5dd";
-  url   = "https://raw.githubusercontent.com/hackbg/arsenal/${rev}/shells/rust-protobuf.nix";
-  pkgs  = builtins.fetchGit {
-    url = "https://github.com/hackbg/arsenal";
-    ref = "main";
-    rev = rev;
-  };
-in import (builtins.fetchurl url) {
+let arsenal = builtins.fetchGit {
+  url = "https://github.com/hackbg/arsenal";
+  rev = "f047c0f3009553561f822269098de065b0d46ab9";
+}; in import "${arsenal.outPath}/shells/rust.nix" rec {
+
   pkgs = import <nixpkgs> {
-    overlays = import "${pkgs.outPath}/overlays.nix";
+    overlays = import "${arsenal.outPath}/overlays.nix";
   };
+
+  extraBuildInputs = with pkgs; [
+    libclang
+    eudev
+  ];
+
+  extraNativeBuildInputs = with pkgs; [
+    pkg-config
+    protobuf
+  ];
+
 }
