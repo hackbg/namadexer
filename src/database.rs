@@ -649,9 +649,9 @@ impl Database {
 
                 let unknown_type = "unknown".to_string();
                 let type_tx = checksums_map.get(&code_hex).unwrap_or(&unknown_type);
-                let data = tx.data().ok_or(Error::InvalidTxData)?;
+                info!("Trying to save {} transaction", type_tx);
 
-                info!("Saving {} transaction", type_tx);
+                let data = tx.data().ok_or(Error::InvalidTxData)?;
 
                 // decode tx_transfer, tx_bond and tx_unbound to store the decoded data in their tables
                 match type_tx.as_str() {
