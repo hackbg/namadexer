@@ -920,7 +920,7 @@ impl Database {
 
         let num_transactions = tx_values.len();
 
-        info!("Saving {} decrypted transactions", num_transactions);
+        info!("Saving {} transactions", num_transactions);
 
         // bulk insert to speed-up this
         // there might be limits regarding the number of parameter
