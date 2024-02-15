@@ -1471,4 +1471,93 @@ impl Database {
     pub fn pool(&self) -> &PgPool {
         self.pool.as_ref()
     }
+
+    const LIST_TRANSFERS: &'static str = r#"
+        SELECT
+            tx_id,
+            source,
+            target,
+            token,
+            amount,
+            key,
+            shielded,
+            block_id,
+            tx_type,
+            wrapper_id,
+            fee_amount_per_gas_unit,
+            fee_token,
+            gas_limit_multiplier,
+            header_height,
+            header_time
+        FROM
+            tx_transfer
+            JOIN transactions ON tx_transfer.tx_id     = transactions.hash
+            JOIN blocks       ON transactions.block_id = blocks.block_id
+    "#;
+
+    pub async fn list_transfers_by_source(&self, address: String)
+        -> Result<Vec<Row>, Error>
+    {
+        query(&format!(r#"SET search_path = "{0}"; {1} WHERE source = $1;"#,
+            self.network,
+            Self::LIST_TRANSFERS
+        ))
+            .bind(address)
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(Error::from)
+    }
+
+    pub async fn list_transfers_by_target(&self, address: String)
+        -> Result<Vec<Row>, Error>
+    {
+        query(&format!(r#"SET search_path = "{0}"; {1} WHERE target = $1;"#,
+            self.network,
+            Self::LIST_TRANSFERS
+        ))
+            .bind(address)
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(Error::from)
+    }
+
+    pub async fn list_transfers_by_source_or_target(&self, address: String)
+        -> Result<Vec<Row>, Error>
+    {
+        query(&format!(r#"SET search_path = "{0}"; {1} WHERE source = $1 OR target = $1;"#,
+            self.network,
+            Self::LIST_TRANSFERS
+        ))
+            .bind(address)
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(Error::from)
+    }
+
+    pub async fn list_transfers_by_block_hash(&self, hash: String)
+        -> Result<Vec<Row>, Error>
+    {
+        query(&format!(r#"SET search_path = "{0}"; {1} WHERE block_id = $1;"#,
+            self.network,
+            Self::LIST_TRANSFERS
+        ))
+            .bind(hash)
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(Error::from)
+    }
+
+    pub async fn list_transfers_by_block_height(&self, height: u32)
+        -> Result<Vec<Row>, Error>
+    {
+        query(&format!(r#"SET search_path = "{0}"; {1} WHERE header_height = $1;"#,
+            self.network,
+            Self::LIST_TRANSFERS
+        ))
+            .bind(height as i64)
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(Error::from)
+    }
+
 }
