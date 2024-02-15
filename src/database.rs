@@ -1474,21 +1474,21 @@ impl Database {
 
     fn select_transfers (&self) -> String {
         format!(r#"SELECT
-            tx_id,
-            source,
-            target,
-            token,
-            amount,
-            key,
-            shielded,
-            block_id,
-            tx_type,
-            wrapper_id,
-            fee_amount_per_gas_unit,
-            fee_token,
-            gas_limit_multiplier,
-            header_height,
-            header_time
+            "{0}".tx_transfer.tx_id                    as tx_id,
+            "{0}".tx_transfer.source                   as source,
+            "{0}".tx_transfer.target                   as target,
+            "{0}".tx_transfer.token                    as token,
+            "{0}".tx_transfer.amount                   as amount,
+            "{0}".tx_transfer.key                      as key,
+            "{0}".tx_transfer.shielded                 as shielded,
+            "{0}".transactions.block_id                as block_id,
+            "{0}".transactions.tx_type                 as tx_type,
+            "{0}".transactions.wrapper_id              as wrapper_id,
+            "{0}".transactions.fee_amount_per_gas_unit as fee_amount_per_gas_unit,
+            "{0}".transactions.fee_token               as fee_token,
+            "{0}".transactions.gas_limit_multiplier    as gas_limit_multiplier,
+            "{0}".blocks.header_height                 as header_height,
+            "{0}".blocks.header_time                   as header_time
         FROM
             "{0}".tx_transfer
             JOIN "{0}".transactions ON "{0}".tx_transfer.tx_id     = "{0}".transactions.hash
