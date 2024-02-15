@@ -7,7 +7,7 @@ use tracing::{info, instrument};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct TransferRecord {
-    tx_id:                   String,
+    tx_id:                   Vec<u8>,
     source:                  String,
     target:                  String,
     token:                   String,
