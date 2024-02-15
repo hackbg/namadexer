@@ -1472,8 +1472,8 @@ impl Database {
         self.pool.as_ref()
     }
 
-    const LIST_TRANSFERS: &'static str = r#"
-        SELECT
+    fn select_transfers (&self) -> String {
+        format!(r#"SELECT
             tx_id,
             source,
             target,
@@ -1490,18 +1490,16 @@ impl Database {
             header_height,
             header_time
         FROM
-            tx_transfer
-            JOIN transactions ON tx_transfer.tx_id     = transactions.hash
-            JOIN blocks       ON transactions.block_id = blocks.block_id
-    "#;
+            "{0}".tx_transfer
+            JOIN "{0}".transactions ON "{0}".tx_transfer.tx_id     = "{0}".transactions.hash
+            JOIN "{0}".blocks       ON "{0}".transactions.block_id = "{0}".blocks.block_id
+        "#, &self.network)
+    }
 
     pub async fn list_transfers_by_source(&self, address: String)
         -> Result<Vec<Row>, Error>
     {
-        query(&format!(r#"SET search_path = "{0}"; {1} WHERE source = $1;"#,
-            self.network,
-            Self::LIST_TRANSFERS
-        ))
+        query(&format!(r#"{} WHERE source = $1;"#, self.select_transfers()))
             .bind(address)
             .fetch_all(&*self.pool)
             .await
@@ -1511,10 +1509,7 @@ impl Database {
     pub async fn list_transfers_by_target(&self, address: String)
         -> Result<Vec<Row>, Error>
     {
-        query(&format!(r#"SET search_path = "{0}"; {1} WHERE target = $1;"#,
-            self.network,
-            Self::LIST_TRANSFERS
-        ))
+        query(&format!(r#"{} WHERE target = $1;"#, self.select_transfers()))
             .bind(address)
             .fetch_all(&*self.pool)
             .await
@@ -1524,10 +1519,7 @@ impl Database {
     pub async fn list_transfers_by_source_or_target(&self, address: String)
         -> Result<Vec<Row>, Error>
     {
-        query(&format!(r#"SET search_path = "{0}"; {1} WHERE source = $1 OR target = $1;"#,
-            self.network,
-            Self::LIST_TRANSFERS
-        ))
+        query(&format!(r#"{} WHERE source = $1 OR target = $1;"#, self.select_transfers()))
             .bind(address)
             .fetch_all(&*self.pool)
             .await
@@ -1537,10 +1529,7 @@ impl Database {
     pub async fn list_transfers_by_block_hash(&self, hash: String)
         -> Result<Vec<Row>, Error>
     {
-        query(&format!(r#"SET search_path = "{0}"; {1} WHERE block_id = $1;"#,
-            self.network,
-            Self::LIST_TRANSFERS
-        ))
+        query(&format!(r#"{} WHERE block_id = $1 ;"#, self.select_transfers()))
             .bind(hash)
             .fetch_all(&*self.pool)
             .await
@@ -1550,10 +1539,7 @@ impl Database {
     pub async fn list_transfers_by_block_height(&self, height: u32)
         -> Result<Vec<Row>, Error>
     {
-        query(&format!(r#"SET search_path = "{0}"; {1} WHERE header_height = $1;"#,
-            self.network,
-            Self::LIST_TRANSFERS
-        ))
+        query(&format!(r#"{} WHERE header_height = $1;"#, self.select_transfers()))
             .bind(height as i64)
             .fetch_all(&*self.pool)
             .await
