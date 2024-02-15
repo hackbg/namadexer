@@ -19,7 +19,7 @@ pub struct TransferRecord {
     wrapper_id:              Vec<u8>,
     fee_amount_per_gas_unit: Option<String>,
     fee_token:               Option<String>,
-    gas_limit_multiplier:    i64,
+    gas_limit_multiplier:    Option<i64>,
     header_height:           String,
     header_time:             String,
 }
