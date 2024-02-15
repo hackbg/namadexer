@@ -569,7 +569,7 @@ impl Database {
             return Ok(());
         }
 
-        info!("Saving {} transactions", txs.len());
+        info!("Received {} transactions", txs.len());
 
         let mut query_builder: QueryBuilder<_> = QueryBuilder::new(format!(
             "INSERT INTO \"{}\".transactions(
@@ -606,8 +606,11 @@ impl Database {
 
             let mut return_code: Option<i32> = None;
 
+            let tx_type = tx.header().tx_type;
+            info!("Received {:?} transaction", tx_type);
+
             // Decrypted transaction give access to the raw data
-            if let TxType::Decrypted(..) = tx.header().tx_type {
+            if let TxType::Decrypted(..) = tx_type {
                 // For unknown reason the header has to be updated before hashing it for its id (https://github.com/Zondax/namadexer/issues/23)
                 hash_id = tx.clone().update_header(TxType::Raw).header_hash().to_vec();
 
@@ -916,6 +919,8 @@ impl Database {
         }
 
         let num_transactions = tx_values.len();
+
+        info!("Saving {} decrypted transactions", num_transactions);
 
         // bulk insert to speed-up this
         // there might be limits regarding the number of parameter
