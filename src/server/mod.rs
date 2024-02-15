@@ -27,6 +27,13 @@ use self::endpoints::{
     account::get_account_updates,
     block::{get_block_by_hash, get_block_by_height, get_last_block},
     transaction::{get_shielded_tx, get_tx_by_hash, get_vote_proposal},
+    transfer::{
+        get_transfers_by_source,
+        get_transfers_by_target,
+        get_transfers_by_source_or_target,
+        get_transfers_by_block_hash,
+        get_transfers_by_block_height
+    },
     validator::{get_validator_list, get_validator_uptime},
 };
 
@@ -52,6 +59,12 @@ fn server_routes(state: ServerState) -> Router<()> {
         .route("/tx/shielded", get(get_shielded_tx))
         // Accounts API:
         .route("/account/updates/:account_id", get(get_account_updates))
+        // Transfers API:
+        .route("/transfers/from/:address", get(get_transfers_by_source))
+        .route("/transfers/to/:address", get(get_transfers_by_target))
+        .route("/transfers/by/:address", get(get_transfers_by_source_or_target))
+        .route("/transfers/in/:block_hash", get(get_transfers_by_block_hash))
+        .route("/transfers/at/:block_height", get(get_transfers_by_block_height))
         // Validators API:
         .route("/validators", get(get_validator_list))
         .route(
