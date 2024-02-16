@@ -20,7 +20,7 @@ pub struct TransferRecord {
     fee_amount_per_gas_unit: Option<String>,
     fee_token:               Option<String>,
     gas_limit_multiplier:    Option<i64>,
-    header_height:           i64,
+    header_height:           i32,
     header_time:             String,
 }
 
