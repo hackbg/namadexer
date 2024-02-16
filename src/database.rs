@@ -650,7 +650,7 @@ impl Database {
                 let code_hex = hex::encode(code.as_slice());
                 let unknown_type = "unknown".to_string();
                 let type_tx = checksums_map.get(&code_hex).unwrap_or(&unknown_type);
-                let data = tx.data().ok_or(Error::InvalidTxData)?;
+                //let data = tx.data().ok_or(Error::InvalidTxData("tx has no data".into()))?;
 
                 info!("Saving {} transaction", type_tx);
 
