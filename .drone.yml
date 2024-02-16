@@ -1,0 +1,46 @@
+---
+kind: pipeline
+type: docker
+name: build namadexer
+trigger: { event: [ push ] }
+volumes:
+- { name: ci-cache-docker, host: { path: /data/ci-cache-docker } }
+- { name: ci-cache-rust, host: { path: /data/ci-cache-rust } }
+steps:
+- name: git
+  image: alpine/git:latest
+  commands:
+  - echo $HOME
+  - ls -al $HOME
+  - sed -i 's|ssh://git@|https://|' .gitmodules
+  - sed -i 's|git.hack.bg:2222|git.hack.bg|' .gitmodules
+  - git submodule update --init --recursive
+  - printf $(git rev-parse --abbrev-ref HEAD) > BRANCH
+  - cat BRANCH
+- name: build
+  image: docker:24.0.7-alpine3.18
+  volumes:
+  - { name: ci-cache-docker, path: /cache/docker }
+  - { name: ci-cache-rust, path: /cache/rust }
+  privileged: true
+  environment:
+    NAME: "oci.hack.bg/namadexer"
+    USER: { from_secret: "oci-user" }
+    PASS: { from_secret: "oci-pass" }
+    MIRROR: "http://127.0.0.1:5000"
+    DOCKER_DATA: "/cache/docker"
+    DOCKER_HOST: "tcp://127.0.0.1:2375"
+  commands:
+  - mkdir -p /cache/rust/git /cache/rust/cache/rust/target-namadexer
+  - chmod a+rwx /cache/rust/git /cache/rust/registry /cache/rust/target-namadexer
+  - whoami
+  - ls -al /cache/rust
+  - nohup dockerd --tls=false --dns 1.1.1.1 --rootless=true --bridge=none --iptables=false --data-root "$DOCKER_DATA" --host="$DOCKER_HOST" --registry-mirror "$MIRROR" &
+  - sleep 5
+  - docker version; docker info
+  - echo "\nLooking around...\n"; whoami; pwd; ls -al
+  - echo "$PASS" | docker login -u "$USER" --password-stdin https://oci.hack.bg
+  - export IMAGE="$NAME:$(cat BRANCH | tr '/' '_' | tr '\n' ' ')"
+  - docker pull "$IMAGE" || true
+  - docker build --network=host --cache-from="$IMAGE" -t "$IMAGE" .
+  - docker push "$IMAGE"
